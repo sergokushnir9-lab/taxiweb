@@ -201,6 +201,43 @@ const App = {
                 }
             });
         });
+
+        const welcomeModal = document.getElementById('welcome-modal');
+        const driverBtn = document.getElementById('welcome-driver-btn');
+        const adminBtn = document.getElementById('welcome-admin-btn');
+        const skipBtn = document.getElementById('welcome-skip-btn');
+
+        if (driverBtn) {
+            driverBtn.addEventListener('click', () => {
+                this.completeWelcome();
+                this.switchSection('driver');
+            });
+        }
+
+        if (adminBtn) {
+            adminBtn.addEventListener('click', () => {
+                this.completeWelcome();
+                this.switchSection('profile');
+                setTimeout(() => {
+                    if (window.Profile?.openAdminPanel) {
+                        window.Profile.openAdminPanel();
+                    }
+                }, 200);
+            });
+        }
+
+        if (skipBtn) {
+            skipBtn.addEventListener('click', () => this.completeWelcome());
+        }
+
+        if (welcomeModal && localStorage.getItem('welcomeCompleted') !== 'true') {
+            welcomeModal.style.display = 'flex';
+        }
+    },
+
+    completeWelcome: function() {
+        localStorage.setItem('welcomeCompleted', 'true');
+        this.closeModal('welcome-modal');
     },
 
     // Показать/скрыть лоадер

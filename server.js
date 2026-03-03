@@ -111,6 +111,83 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (pathname === '/api/admin/config' && req.method === 'GET') {
+      const db = await readDb();
+      sendJson(res, 200, db.admin || {});
+      return;
+    }
+
+    if (pathname === '/api/admin/config' && req.method === 'POST') {
+      const { name, phone, telegram } = await parseBody(req);
+      if (!name || !phone) {
+        sendJson(res, 400, { message: 'Поля name и phone обязательны.' });
+        return;
+      }
+
+      const db = await readDb();
+      db.admin = {
+        name,
+        phone,
+        telegram: telegram || '',
+        updatedAt: new Date().toISOString()
+      };
+      await writeDb(db);
+      sendJson(res, 200, db.admin);
+      return;
+    }
+
+    if (pathname === '/api/driver/profile' && req.method === 'GET') {
+      const userId = requestUrl.searchParams.get('userId');
+      if (!userId) {
+        sendJson(res, 400, { message: 'Параметр userId обязателен.' });
+        return;
+      }
+
+      const db = await readDb();
+      const profile = (db.drivers || []).find((driver) => driver.userId === userId);
+      if (!profile) {
+        sendJson(res, 404, { message: 'Профиль водителя не найден.' });
+        return;
+      }
+      sendJson(res, 200, profile);
+      return;
+    }
+
+    if (pathname === '/api/driver/register' && req.method === 'POST') {
+      const { userId, fullName, phone, carModel, carPlate, avatarPhoto, licensePhoto } = await parseBody(req);
+      if (!userId || !fullName || !phone || !carModel || !carPlate || !avatarPhoto || !licensePhoto) {
+        sendJson(res, 400, { message: 'Заполните все поля регистрации водителя.' });
+        return;
+      }
+
+      const db = await readDb();
+      if (!Array.isArray(db.drivers)) db.drivers = [];
+
+      const existingIndex = db.drivers.findIndex((driver) => driver.userId === userId);
+      const profile = {
+        id: existingIndex >= 0 ? db.drivers[existingIndex].id : createId('driver-profile'),
+        userId,
+        fullName,
+        phone,
+        carModel,
+        carPlate,
+        avatarPhoto,
+        licensePhoto,
+        createdAt: existingIndex >= 0 ? db.drivers[existingIndex].createdAt : new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      if (existingIndex >= 0) {
+        db.drivers[existingIndex] = profile;
+      } else {
+        db.drivers.push(profile);
+      }
+
+      await writeDb(db);
+      sendJson(res, 201, profile);
+      return;
+    }
+
     if (pathname === '/api/passenger/quick-addresses' && req.method === 'GET') {
       const db = await readDb();
       sendJson(res, 200, db.quickAddresses);

@@ -49,5 +49,12 @@
     }
   ],
   "deliveryRequests": [],
-  "plannedRides": []
+  "plannedRides": [],
+  "admin": {
+    "name": "",
+    "phone": "",
+    "telegram": "",
+    "updatedAt": null
+  },
+  "drivers": []
 }
