@@ -1,53 +1,24 @@
 {
-  "profile": {
-    "id": "user-1",
-    "name": "Пользователь",
-    "username": "taxi_user",
-    "balances": {
-      "main": 1240,
-      "bonus": 180
-    }
-  },
-  "notifications": [
+  "users": [
     {
-      "id": "n-1",
-      "title": "Новый заказ рядом",
-      "text": "ул. Ленина → ул. Пушкина за 480 ₽",
-      "time": "2 мин назад",
-      "isNew": true
+      "id": "u_admin",
+      "role": "admin",
+      "fullName": "Главный админ",
+      "phone": "+70000000000",
+      "contact": "admin@taxiweb.local",
+      "source": "web",
+      "tgUserId": null,
+      "driverApproved": true,
+      "hourlyRate": null,
+      "createdAt": "2026-01-01T10:00:00.000Z"
     }
   ],
-  "quickAddresses": {
-    "home": {
-      "from": "ул. Ленина, 15",
-      "to": ""
-    },
-    "work": {
-      "from": "ул. Пушкина, 42",
-      "to": ""
-    },
-    "airport": {
-      "from": "",
-      "to": "Аэропорт Енакиево"
-    }
-  },
-  "passengerOrders": [],
-  "driverOrders": [
-    {
-      "id": "d-1",
-      "from": "ул. Советская, 2",
-      "to": "ул. Набережная, 15",
-      "price": 390,
-      "status": "open"
-    },
-    {
-      "id": "d-2",
-      "from": "ул. Мира, 18",
-      "to": "ЖД Вокзал",
-      "price": 520,
-      "status": "open"
-    }
+  "driverApplications": [],
+  "cities": [
+    { "id": "city_1", "name": "Москва" },
+    { "id": "city_2", "name": "Санкт-Петербург" }
   ],
-  "deliveryRequests": [],
-  "plannedRides": []
+  "orders": [],
+  "notifications": [],
+  "telegramOutbox": []
 }
