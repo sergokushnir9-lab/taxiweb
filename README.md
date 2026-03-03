@@ -16,6 +16,10 @@ npm start
 - `GET /api/health` — статус сервера.
 - `GET /api/profile` — профиль и балансы.
 - `GET /api/notifications` — уведомления.
+- `GET /api/admin/config` — получить данные администратора.
+- `POST /api/admin/config` — сохранить данные администратора.
+- `GET /api/driver/profile?userId=...` — получить профиль водителя.
+- `POST /api/driver/register` — регистрация/обновление анкеты водителя.
 - `GET /api/passenger/quick-addresses` — быстрые адреса пассажира.
 - `POST /api/passenger/orders` — создать заказ пассажира.
 - `GET /api/driver/orders` — список заказов водителя.
@@ -25,3 +29,6 @@ npm start
 - `POST /api/planned/rides` — создать запланированную поездку.
 
 Данные сохраняются в `backend/data/db.json`.
+
+
+Данные администратора и регистрации водителей сохраняются в `backend/data/db.json` в полях `admin` и `drivers`.

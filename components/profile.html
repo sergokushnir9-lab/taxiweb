@@ -47,10 +47,37 @@
             <span>Настройки</span>
             <i class="fas fa-chevron-right"></i>
         </div>
+        <div class="action-item" data-action="admin">
+            <i class="fas fa-user-shield"></i>
+            <span>Админ-панель</span>
+            <i class="fas fa-chevron-right"></i>
+        </div>
         <div class="action-item danger" data-action="logout">
             <i class="fas fa-sign-out-alt"></i>
             <span>Выйти</span>
             <i class="fas fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <div class="modal" id="admin-modal">
+        <div class="modal-content">
+            <h3>Данные администратора</h3>
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="admin-name" placeholder="Имя администратора" />
+            </div>
+            <div class="input-group">
+                <i class="fas fa-phone"></i>
+                <input type="tel" id="admin-phone" placeholder="Телефон администратора" />
+            </div>
+            <div class="input-group">
+                <i class="fas fa-at"></i>
+                <input type="text" id="admin-telegram" placeholder="Telegram @username" />
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="admin-cancel-btn">Отмена</button>
+                <button class="btn primary" id="admin-save-btn">Сохранить</button>
+            </div>
         </div>
     </div>
 </section>

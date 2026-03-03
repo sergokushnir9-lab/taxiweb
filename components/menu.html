@@ -4,7 +4,7 @@
         <i class="fas fa-user-circle"></i>
     </div>
     
-    <div class="balance-card" onclick="App.openModal(topup-modal)">
+    <div class="balance-card" onclick="App.openModal('topup-modal')">
         <span class="balance-label">Баланс</span>
         <span class="balance-value" id="balance">0 ₽</span>
     </div>
@@ -40,3 +40,15 @@
         <p>Запланировать</p>
     </div>
 </main>
+
+<div class="modal" id="welcome-modal" style="display:none;">
+    <div class="modal-content welcome-content">
+        <h3>Добро пожаловать 👋</h3>
+        <p>Выберите, что хотите настроить при первом входе:</p>
+        <div class="welcome-actions">
+            <button class="btn primary" id="welcome-driver-btn"><i class="fas fa-id-card"></i> Регистрация водителя</button>
+            <button class="btn" id="welcome-admin-btn"><i class="fas fa-user-shield"></i> Данные админа</button>
+            <button class="btn ghost" id="welcome-skip-btn">Пропустить</button>
+        </div>
+    </div>
+</div>

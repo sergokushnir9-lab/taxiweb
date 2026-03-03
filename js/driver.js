@@ -43,10 +43,12 @@ const Driver = {
     },
 
     // Инициализация модуля
-    init: function() {
+    init: async function() {
         this.cacheElements();
         this.initEvents();
-        this.checkDriverStatus();
+        const hasDriverProfile = await this.checkDriverStatus();
+        if (!hasDriverProfile) return;
+
         this.updateUI();
         this.loadOrders();
     },
@@ -125,40 +127,129 @@ const Driver = {
     },
 
     // Проверка статуса водителя
-    checkDriverStatus: function() {
-        // Здесь будет API запрос для проверки
-        // Для демо - симулируем проверку
-        const isDriver = localStorage.getItem('isDriver') === 'true' || true;
-        
-        if (!isDriver) {
-            App.showNotification("Вы не зарегистрированы как водитель", "error");
-            setTimeout(() => App.loadSection('main'), 2000);
+    checkDriverStatus: async function() {
+        try {
+            const userId = App.userData?.id || 'demo-user';
+            const response = await fetch(`/api/driver/profile?userId=${encodeURIComponent(userId)}`);
+
+            if (response.status === 404) {
+                this.renderRegistrationForm();
+                return false;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const driverProfile = await response.json();
+            localStorage.setItem('isDriver', 'true');
+            this.loadDriverData(driverProfile);
+            return true;
+        } catch (error) {
+            console.error('Ошибка проверки статуса водителя', error);
+            this.renderRegistrationForm();
             return false;
         }
-        
-        // Загружаем данные водителя
-        this.loadDriverData();
-        return true;
     },
 
     // Загрузка данных водителя
-    loadDriverData: function() {
-        // Здесь будет API запрос
-        // Для демо - используем тестовые данные
+    loadDriverData: function(driverProfile) {
         const driverData = {
-            name: "Иван Петров",
+            name: driverProfile?.fullName || 'Иван Петров',
             rating: 4.8,
             balance: 1250,
-            carModel: "Toyota Camry",
-            carColor: "Черный",
-            carNumber: "А123ВС77",
+            carModel: driverProfile?.carModel || 'Не указано',
+            carColor: '—',
+            carNumber: driverProfile?.carPlate || '—',
             completedOrders: 247,
             onlineHours: 156,
             tariffActive: true,
-            tariffExpires: Date.now() + (8 * 60 * 60 * 1000) + (42 * 60 * 1000) + (15 * 1000) // 8:42:15
+            tariffExpires: Date.now() + (8 * 60 * 60 * 1000) + (42 * 60 * 1000) + (15 * 1000)
         };
 
         this.updateDriverCard(driverData);
+
+        const carModelNode = document.getElementById('car-model');
+        const carNumberNode = document.getElementById('car-number');
+        if (carModelNode) carModelNode.textContent = driverData.carModel;
+        if (carNumberNode) carNumberNode.textContent = `• ${driverData.carNumber}`;
+    },
+
+
+    renderRegistrationForm: function() {
+        const section = document.querySelector('.section');
+        if (!section) return;
+
+        section.innerHTML = `
+            <div class="section-header">
+                <button class="btn back-btn" onclick="App.goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="section-title">Регистрация водителя</h2>
+            </div>
+            <div class="search-card">
+                <form id="driver-registration-form" class="driver-registration-form">
+                    <div class="input-group required"><i class="fas fa-user"></i><input required id="driver-full-name" type="text" placeholder="Имя и фамилия*" /></div>
+                    <div class="input-group required"><i class="fas fa-phone"></i><input required id="driver-phone" type="tel" placeholder="Номер телефона*" /></div>
+                    <div class="input-group required"><i class="fas fa-car"></i><input required id="driver-car-model" type="text" placeholder="Номер авто / модель*" /></div>
+                    <div class="input-group required"><i class="fas fa-id-card"></i><input required id="driver-car-plate" type="text" placeholder="Гос номер машины*" /></div>
+                    <label class="file-field"><span><i class="fas fa-image"></i> Фото аватара (видно пассажирам)</span><input required id="driver-avatar" type="file" accept="image/*" /></label>
+                    <label class="file-field"><span><i class="fas fa-address-card"></i> Фото водительского (только для админа)</span><input required id="driver-license" type="file" accept="image/*" /></label>
+                    <button class="btn primary full-width" type="submit"><i class="fas fa-check"></i> Зарегистрироваться</button>
+                </form>
+            </div>
+        `;
+
+        document.getElementById('driver-registration-form')?.addEventListener('submit', (event) => this.submitRegistration(event));
+    },
+
+    fileToDataUrl: function(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    },
+
+    submitRegistration: async function(event) {
+        event.preventDefault();
+
+        const avatarFile = document.getElementById('driver-avatar')?.files?.[0];
+        const licenseFile = document.getElementById('driver-license')?.files?.[0];
+        if (!avatarFile || !licenseFile) {
+            App.showNotification('Добавьте обе фотографии', 'warning');
+            return;
+        }
+
+        const payload = {
+            userId: App.userData?.id || 'demo-user',
+            fullName: document.getElementById('driver-full-name')?.value?.trim(),
+            phone: document.getElementById('driver-phone')?.value?.trim(),
+            carModel: document.getElementById('driver-car-model')?.value?.trim(),
+            carPlate: document.getElementById('driver-car-plate')?.value?.trim(),
+            avatarPhoto: await this.fileToDataUrl(avatarFile),
+            licensePhoto: await this.fileToDataUrl(licenseFile)
+        };
+
+        try {
+            const response = await fetch('/api/driver/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            localStorage.setItem('isDriver', 'true');
+            App.showNotification('Регистрация водителя завершена', 'success');
+            this.load();
+        } catch (error) {
+            console.error(error);
+            App.showNotification('Не удалось зарегистрировать водителя', 'error');
+        }
     },
 
     // Обновление карточки водителя
