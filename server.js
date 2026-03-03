@@ -35,7 +35,9 @@ const sendJson = (res, statusCode, data) => {
 
 const parseBody = (req) => new Promise((resolve, reject) => {
   let body = '';
-  req.on('data', (chunk) => { body += chunk; });
+  req.on('data', (chunk) => {
+    body += chunk;
+  });
   req.on('end', () => {
     if (!body) {
       resolve({});
@@ -65,19 +67,16 @@ const serveStatic = async (pathname, res) => {
     }
     const data = await fs.readFile(filePath);
     const ext = path.extname(filePath).toLowerCase();
-    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': contentType });
+    res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
     res.end(data);
   } catch {
-    try {
-      const index = await fs.readFile(path.join(ROOT, 'index.html'));
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(index);
-    } catch {
-      sendJson(res, 500, { message: 'Не удалось загрузить index.html' });
-    }
+    const index = await fs.readFile(path.join(ROOT, 'index.html'));
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(index);
   }
 };
+
+const requireAdmin = (db, token) => db.sessions?.[token] && db.sessions[token].role === 'admin';
 
 const server = http.createServer(async (req, res) => {
   try {
@@ -99,101 +98,178 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    if (pathname === '/api/profile' && req.method === 'GET') {
+    if (pathname === '/api/bootstrap' && req.method === 'GET') {
       const db = await readDb();
-      sendJson(res, 200, db.profile);
+      sendJson(res, 200, {
+        drivers: db.drivers,
+        passengers: db.passengers,
+        orders: db.orders,
+        pendingDrivers: db.drivers.filter((driver) => !driver.approved)
+      });
       return;
     }
 
-    if (pathname === '/api/notifications' && req.method === 'GET') {
+    if (pathname === '/api/auth/admin' && req.method === 'POST') {
+      const { login, password } = await parseBody(req);
       const db = await readDb();
-      sendJson(res, 200, db.notifications);
+      const admin = db.admins.find((item) => item.login === login && item.password === password);
+      if (!admin) {
+        sendJson(res, 401, { message: 'Неверный логин или пароль.' });
+        return;
+      }
+      const token = createId('admin-token');
+      db.sessions[token] = { id: admin.id, role: 'admin', createdAt: new Date().toISOString() };
+      await writeDb(db);
+      sendJson(res, 200, { token, admin: { id: admin.id, name: admin.name } });
       return;
     }
 
-    if (pathname === '/api/passenger/quick-addresses' && req.method === 'GET') {
-      const db = await readDb();
-      sendJson(res, 200, db.quickAddresses);
-      return;
-    }
-
-    if (pathname === '/api/passenger/orders' && req.method === 'POST') {
-      const { from, to, phone, price, comment } = await parseBody(req);
-      if (!from || !to || !phone || !price) {
-        sendJson(res, 400, { message: 'Поля from, to, phone и price обязательны.' });
+    if (pathname === '/api/register/passenger' && req.method === 'POST') {
+      const { name, phone, photo = '' } = await parseBody(req);
+      if (!name || !phone) {
+        sendJson(res, 400, { message: 'Укажите имя и телефон.' });
         return;
       }
       const db = await readDb();
-      const order = {
-        id: createId('p'), from, to, phone, price: Number(price), comment: comment || '', status: 'published', createdAt: new Date().toISOString()
+      const passenger = { id: createId('passenger'), name, phone, photo, createdAt: new Date().toISOString() };
+      db.passengers.unshift(passenger);
+      await writeDb(db);
+      sendJson(res, 201, passenger);
+      return;
+    }
+
+    if (pathname === '/api/register/driver' && req.method === 'POST') {
+      const { name, phone, car, photo } = await parseBody(req);
+      if (!name || !phone || !car || !photo) {
+        sendJson(res, 400, { message: 'Для водителя обязательны имя, телефон, авто и фото.' });
+        return;
+      }
+      const db = await readDb();
+      const driver = {
+        id: createId('driver'),
+        name,
+        phone,
+        car,
+        photo,
+        approved: false,
+        status: 'offline',
+        balance: 0,
+        createdAt: new Date().toISOString()
       };
-      db.passengerOrders.unshift(order);
-      db.driverOrders.unshift({ id: createId('d'), from, to, price: Number(price), status: 'open' });
+      db.drivers.unshift(driver);
+      await writeDb(db);
+      sendJson(res, 201, driver);
+      return;
+    }
+
+    if (pathname === '/api/orders' && req.method === 'POST') {
+      const { passengerId, from, to, phone, price, comment = '' } = await parseBody(req);
+      if (!passengerId || !from || !to || !phone || !price) {
+        sendJson(res, 400, { message: 'Не все поля заказа заполнены.' });
+        return;
+      }
+      const db = await readDb();
+      const passenger = db.passengers.find((item) => item.id === passengerId);
+      if (!passenger) {
+        sendJson(res, 404, { message: 'Пассажир не найден, сначала зарегистрируйтесь.' });
+        return;
+      }
+      const order = {
+        id: createId('order'),
+        passengerId,
+        driverId: null,
+        from,
+        to,
+        phone,
+        price: Number(price),
+        comment,
+        status: 'open',
+        createdAt: new Date().toISOString()
+      };
+      db.orders.unshift(order);
       await writeDb(db);
       sendJson(res, 201, order);
       return;
     }
 
-    if (pathname === '/api/driver/orders' && req.method === 'GET') {
+    if (pathname === '/api/orders' && req.method === 'GET') {
       const db = await readDb();
-      sendJson(res, 200, db.driverOrders);
+      const driverId = requestUrl.searchParams.get('driverId');
+      let orders = db.orders;
+      if (driverId) {
+        orders = db.orders.filter((order) => order.status === 'open' || order.driverId === driverId);
+      }
+      sendJson(res, 200, orders);
       return;
     }
 
-    if (pathname.startsWith('/api/driver/orders/') && pathname.endsWith('/accept') && req.method === 'PATCH') {
-      const id = pathname.split('/')[4];
+    if (pathname.startsWith('/api/orders/') && pathname.endsWith('/accept') && req.method === 'PATCH') {
+      const id = pathname.split('/')[3];
+      const { driverId } = await parseBody(req);
       const db = await readDb();
-      const order = db.driverOrders.find((item) => item.id === id);
-      if (!order) {
-        sendJson(res, 404, { message: 'Заказ не найден.' });
+      const driver = db.drivers.find((item) => item.id === driverId && item.approved);
+      if (!driver) {
+        sendJson(res, 400, { message: 'Водитель не найден или не одобрен.' });
+        return;
+      }
+      if (driver.status !== 'online') {
+        sendJson(res, 400, { message: 'Сначала перейдите в статус "на линии".' });
+        return;
+      }
+      const order = db.orders.find((item) => item.id === id);
+      if (!order || order.status !== 'open') {
+        sendJson(res, 404, { message: 'Заказ недоступен.' });
         return;
       }
       order.status = 'accepted';
+      order.driverId = driver.id;
       order.acceptedAt = new Date().toISOString();
       await writeDb(db);
       sendJson(res, 200, order);
       return;
     }
 
-    if (pathname === '/api/delivery/requests' && req.method === 'POST') {
-      const { address, phone, description, price } = await parseBody(req);
-      if (!address || !phone || !price) {
-        sendJson(res, 400, { message: 'Поля address, phone и price обязательны.' });
+    if (pathname.startsWith('/api/orders/') && pathname.endsWith('/cancel') && req.method === 'PATCH') {
+      const id = pathname.split('/')[3];
+      const { actor = 'passenger', reason = '' } = await parseBody(req);
+      const db = await readDb();
+      const order = db.orders.find((item) => item.id === id);
+      if (!order) {
+        sendJson(res, 404, { message: 'Заказ не найден.' });
         return;
       }
-      const db = await readDb();
-      const request = {
-        id: createId('delivery'),
-        address,
-        phone,
-        description: description || '',
-        price: Number(price),
-        status: 'new',
-        createdAt: new Date().toISOString()
-      };
-      db.deliveryRequests.unshift(request);
+      if (order.status === 'cancelled') {
+        sendJson(res, 400, { message: 'Заказ уже отменен.' });
+        return;
+      }
+      order.status = 'cancelled';
+      order.cancelledBy = actor;
+      order.cancelReason = reason;
+      order.cancelledAt = new Date().toISOString();
       await writeDb(db);
-      sendJson(res, 201, request);
+      sendJson(res, 200, order);
       return;
     }
 
-    if (pathname === '/api/planned/rides' && req.method === 'GET') {
+    if (pathname.startsWith('/api/drivers/') && req.method === 'PATCH') {
+      const driverId = pathname.split('/')[3];
       const db = await readDb();
-      sendJson(res, 200, db.plannedRides);
-      return;
-    }
-
-    if (pathname === '/api/planned/rides' && req.method === 'POST') {
-      const { from, to, plannedAt, price } = await parseBody(req);
-      if (!from || !to || !plannedAt || !price) {
-        sendJson(res, 400, { message: 'Поля from, to, plannedAt и price обязательны.' });
+      const token = requestUrl.searchParams.get('token') || '';
+      if (!requireAdmin(db, token)) {
+        sendJson(res, 403, { message: 'Только администратор.' });
         return;
       }
-      const db = await readDb();
-      const plannedRide = { id: createId('planned'), from, to, plannedAt, price: Number(price), status: 'scheduled' };
-      db.plannedRides.unshift(plannedRide);
+      const driver = db.drivers.find((item) => item.id === driverId);
+      if (!driver) {
+        sendJson(res, 404, { message: 'Водитель не найден.' });
+        return;
+      }
+      const { approved, balance, status } = await parseBody(req);
+      if (typeof approved === 'boolean') driver.approved = approved;
+      if (typeof balance === 'number') driver.balance = balance;
+      if (status === 'online' || status === 'offline') driver.status = status;
       await writeDb(db);
-      sendJson(res, 201, plannedRide);
+      sendJson(res, 200, driver);
       return;
     }
 
