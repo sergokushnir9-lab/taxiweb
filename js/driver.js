@@ -128,11 +128,11 @@ const Driver = {
     checkDriverStatus: function() {
         // Здесь будет API запрос для проверки
         // Для демо - симулируем проверку
-        const isDriver = localStorage.getItem('isDriver') === 'true' || true;
+        const isDriver = localStorage.getItem('isDriver') === 'true';
         
         if (!isDriver) {
             App.showNotification("Вы не зарегистрированы как водитель", "error");
-            setTimeout(() => App.loadSection('main'), 2000);
+            setTimeout(() => App.loadMainMenu(), 1200);
             return false;
         }
         

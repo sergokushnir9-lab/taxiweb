@@ -116,7 +116,9 @@ const App = {
                 Passenger.load();
                 break;
             case 'driver':
-                Driver.load();
+                if (this.ensureDriverAccess()) {
+                    Driver.load();
+                }
                 break;
             case 'delivery':
                 Delivery.load();
@@ -127,6 +129,26 @@ const App = {
             default:
                 this.loadMainMenu();
         }
+    },
+
+    // Проверка доступа в раздел водителя
+    ensureDriverAccess: function() {
+        const isDriver = localStorage.getItem('isDriver') === 'true';
+        if (isDriver) return true;
+
+        const shouldRegister = window.confirm(
+            'Вы не зарегистрированы как водитель.\n\nХотите пройти регистрацию?'
+        );
+
+        if (shouldRegister) {
+            this.showNotification(
+                'Чтобы стать водителем, пройдите регистрацию в профиле (раздел скоро будет доступен).',
+                'info'
+            );
+        }
+
+        this.loadMainMenu();
+        return false;
     },
 
     // Назад к главному меню
