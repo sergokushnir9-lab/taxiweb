@@ -1,33 +1,14 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>Taxi • Mini App</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>TaxiWeb</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div class="app-container" id="app-container">
-        <!-- Контейнер для динамической загрузки контента -->
-        <div id="content-container"></div>
-    </div>
-
-    <!-- Подключаем все JS файлы -->
-    <script src="utils/helpers.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/profile.js"></script>
-    <script src="js/passenger.js"></script>
-    <script src="js/driver.js"></script>
-    <script src="js/delivery.js"></script>
-    <script src="js/planned.js"></script>
-
-    <script>
-        // Инициализация приложения
-        document.addEventListener('DOMContentLoaded', function() {
-            App.init();
-        });
-    </script>
+  <div id="app"></div>
+  <script src="app.js"></script>
 </body>
 </html>

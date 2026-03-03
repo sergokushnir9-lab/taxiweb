@@ -1,53 +1,14 @@
 {
-  "profile": {
-    "id": "user-1",
-    "name": "Пользователь",
-    "username": "taxi_user",
-    "balances": {
-      "main": 1240,
-      "bonus": 180
-    }
-  },
-  "notifications": [
+  "admins": [
     {
-      "id": "n-1",
-      "title": "Новый заказ рядом",
-      "text": "ул. Ленина → ул. Пушкина за 480 ₽",
-      "time": "2 мин назад",
-      "isNew": true
+      "id": "admin-1",
+      "login": "admin",
+      "password": "admin123",
+      "name": "Главный админ"
     }
   ],
-  "quickAddresses": {
-    "home": {
-      "from": "ул. Ленина, 15",
-      "to": ""
-    },
-    "work": {
-      "from": "ул. Пушкина, 42",
-      "to": ""
-    },
-    "airport": {
-      "from": "",
-      "to": "Аэропорт Енакиево"
-    }
-  },
-  "passengerOrders": [],
-  "driverOrders": [
-    {
-      "id": "d-1",
-      "from": "ул. Советская, 2",
-      "to": "ул. Набережная, 15",
-      "price": 390,
-      "status": "open"
-    },
-    {
-      "id": "d-2",
-      "from": "ул. Мира, 18",
-      "to": "ЖД Вокзал",
-      "price": 520,
-      "status": "open"
-    }
-  ],
-  "deliveryRequests": [],
-  "plannedRides": []
+  "sessions": {},
+  "drivers": [],
+  "passengers": [],
+  "orders": []
 }
