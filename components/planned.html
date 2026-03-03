@@ -9,25 +9,36 @@
     <div class="planned-trips-card">
         <div class="planned-header">
             <h4>Будущие поездки</h4>
-            <button class="btn primary" id="create-plan-btn">
-                <i class="fas fa-plus"></i> Новая
+        </div>
+
+        <div class="search-card" style="margin-top: 12px;">
+            <div class="input-group required">
+                <i class="fas fa-map-pin"></i>
+                <input type="text" id="planned-from" placeholder="Откуда*" autocomplete="off" required />
+                <span class="required-badge">обязательно</span>
+            </div>
+            <div class="input-group required">
+                <i class="fas fa-flag-checkered"></i>
+                <input type="text" id="planned-to" placeholder="Куда*" autocomplete="off" required />
+                <span class="required-badge">обязательно</span>
+            </div>
+            <div class="input-group required">
+                <i class="fas fa-calendar-alt"></i>
+                <input type="datetime-local" id="planned-at" required />
+                <span class="required-badge">обязательно</span>
+            </div>
+            <div class="input-group price-input-group required">
+                <i class="fas fa-ruble-sign"></i>
+                <input type="number" min="100" step="50" id="planned-price" placeholder="Цена*" required />
+                <span class="currency">₽</span>
+                <span class="required-badge">обязательно</span>
+            </div>
+
+            <button class="btn primary full-width" id="create-plan-btn">
+                <i class="fas fa-plus"></i> Создать поездку
             </button>
         </div>
-        
-        <div class="planned-list">
-            <div class="planned-item">
-                <div class="planned-date">
-                    <div class="date-day">Завтра</div>
-                    <div class="date-time">08:30</div>
-                </div>
-                <div class="planned-details">
-                    <div class="planned-route">Дом → Школа</div>
-                    <div class="planned-info">
-                        <span><i class="fas fa-baby"></i> Детское кресло</span>
-                        <span><i class="fas fa-user"></i> Для дочери</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+        <div class="planned-list" id="planned-list" style="margin-top: 16px;"></div>
     </div>
 </section>
