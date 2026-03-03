@@ -4,6 +4,7 @@
   "description": "Taxi mini app with Node.js backend",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "export:full-code": "bash scripts/export-full-code.sh"
   }
 }
