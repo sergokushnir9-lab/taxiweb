@@ -1,0 +1,9 @@
+{
+  "name": "taxiweb",
+  "version": "1.0.0",
+  "description": "Taxi mini app with Node.js backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

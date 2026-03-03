@@ -50,12 +50,27 @@ const Profile = {
     },
 
     // Обновление балансов
-    updateBalances: function() {
+    updateBalances: async function() {
         const mainBalance = document.getElementById("main-balance");
         const bonusBalance = document.getElementById("bonus-balance");
-        
-        if (mainBalance) mainBalance.textContent = "1 240";
-        if (bonusBalance) bonusBalance.textContent = "180";
+
+        try {
+            const response = await fetch('/api/profile');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const profile = await response.json();
+            const main = profile?.balances?.main ?? 1240;
+            const bonus = profile?.balances?.bonus ?? 180;
+
+            if (mainBalance) mainBalance.textContent = new Intl.NumberFormat('ru-RU').format(main);
+            if (bonusBalance) bonusBalance.textContent = new Intl.NumberFormat('ru-RU').format(bonus);
+        } catch (error) {
+            console.warn('Не удалось загрузить баланс из API, используем значения по умолчанию.', error);
+            if (mainBalance) mainBalance.textContent = "1 240";
+            if (bonusBalance) bonusBalance.textContent = "180";
+        }
     },
 
     // Открыть историю поездок
