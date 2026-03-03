@@ -1,0 +1,56 @@
+<section class="section">
+    <div class="section-header">
+        <button class="btn back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2 class="section-title">Профиль</h2>
+    </div>
+
+    <div class="profile-card">
+        <div class="profile-top">
+            <div class="profile-avatar-large">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="profile-user-info">
+                <h3 id="user-name">@Пользователь</h3>
+                <p class="user-status">Активный пользователь</p>
+            </div>
+        </div>
+
+        <div class="profile-balances">
+            <div class="balance-item">
+                <div class="balance-icon">₽</div>
+                <div class="balance-content">
+                    <span class="balance-label">Основной</span>
+                    <span class="balance-value" id="main-balance">0</span>
+                </div>
+            </div>
+            
+            <div class="balance-item bonus">
+                <div class="balance-icon">★</div>
+                <div class="balance-content">
+                    <span class="balance-label">Бонусы</span>
+                    <span class="balance-value" id="bonus-balance">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <div class="action-item" data-action="history">
+            <i class="fas fa-history"></i>
+            <span>История поездок</span>
+            <i class="fas fa-chevron-right"></i>
+        </div>
+        <div class="action-item" data-action="settings">
+            <i class="fas fa-cog"></i>
+            <span>Настройки</span>
+            <i class="fas fa-chevron-right"></i>
+        </div>
+        <div class="action-item danger" data-action="logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Выйти</span>
+            <i class="fas fa-chevron-right"></i>
+        </div>
+    </div>
+</section>

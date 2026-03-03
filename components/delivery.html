@@ -1,0 +1,117 @@
+<section class="section">
+    <div class="section-header">
+        <button class="btn back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2 class="section-title">Доставка</h2>
+    </div>
+
+    <div class="search-card">
+        <!-- Быстрые адреса для доставки -->
+        <div class="quick-addresses">
+            <div class="quick-address" data-type="home" title="Домашний адрес">
+                <i class="fas fa-home"></i>
+                <span>Домой</span>
+            </div>
+            <div class="quick-address" data-type="work" title="Рабочий адрес">
+                <i class="fas fa-briefcase"></i>
+                <span>На работу</span>
+            </div>
+            <div class="quick-address" data-type="market" title="Ближайший магазин">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Магазин</span>
+            </div>
+            <!-- Дополнительный адрес (опционально) -->
+            <div class="quick-address" data-type="friend" title="К другу">
+                <i class="fas fa-user-friends"></i>
+                <span>К другу</span>
+            </div>
+        </div>
+
+        <!-- Адрес доставки -->
+        <div class="input-group required">
+            <i class="fas fa-map-marker-alt"></i>
+            <input type="text" placeholder="Адрес доставки*" id="delivery-address" 
+                   autocomplete="street-address" required 
+                   title="Введите полный адрес доставки" />
+            <span class="required-badge">обязательно</span>
+        </div>
+
+        <!-- Номер телефона -->
+        <div class="input-group required">
+            <i class="fas fa-phone"></i>
+            <input type="tel" placeholder="Номер телефона*" id="delivery-phone" 
+                   autocomplete="tel" required 
+                   title="Введите ваш номер телефона" 
+                   pattern="^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$" />
+            <span class="required-badge">обязательно</span>
+        </div>
+
+        <!-- Список товаров (текстовое поле) -->
+        <div class="input-group">
+            <i class="fas fa-list"></i>
+            <textarea placeholder="Напишите список товаров (например: Пицца Маргарита - 2 шт, Кола 1.5л - 3 шт, Салат Цезарь - 1 порция)" 
+                      id="delivery-items" 
+                      rows="4" 
+                      maxlength="500"
+                      title="Укажите товары, количество и важные детали"></textarea>
+        </div>
+        <div class="delivery-items-hint">
+            <i class="fas fa-info-circle"></i> Укажите товары, количество и любые важные детали
+        </div>
+        <div class="char-counter" id="delivery-char-counter">0/500 символов</div>
+
+        <!-- Дополнительные опции -->
+        <div class="special-options">
+            <div class="option-toggle" data-option="delivery-fragile" title="Для хрупких предметов">
+                <i class="fas fa-glass-cheers"></i>
+                <span>Хрупкий груз</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="delivery-fragile-toggle">
+                    <span class="slider"></span>
+                </div>
+            </div>
+            
+            <div class="option-toggle" data-option="delivery-cold" title="Для скоропортящихся товаров">
+                <i class="fas fa-snowflake"></i>
+                <span>Требуется охлаждение</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="delivery-cold-toggle">
+                    <span class="slider"></span>
+                </div>
+            </div>
+            
+            <div class="option-toggle" data-option="delivery-fast" title="Ускоренная доставка (+200₽)">
+                <i class="fas fa-bolt"></i>
+                <span>Срочная доставка</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="delivery-fast-toggle">
+                    <span class="slider"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Цена доставки -->
+        <div class="input-group price-input-group required">
+            <i class="fas fa-ruble-sign"></i>
+            <input type="tel" inputmode="numeric" placeholder="Цена за доставку* (рекомендуемо: 300₽)" 
+                   id="delivery-price" required 
+                   title="Укажите стоимость доставки" />
+            <span class="currency">₽</span>
+            <span class="required-badge">обязательно</span>
+        </div>
+
+        <div class="price-hint">
+            Обычная стоимость доставки: <strong>200–500 ₽</strong>
+            <br><small class="price-details">Цена может меняться в зависимости от выбранных опций</small>
+        </div>
+
+        <button class="btn primary full-width" id="publish-delivery-btn" type="button">
+            <i class="fas fa-paper-plane"></i> Заказать доставку
+        </button>
+        
+        <div class="required-note">
+            <i class="fas fa-info-circle"></i> Поля помеченные * являются обязательными для заполнения
+        </div>
+    </div>
+</section>

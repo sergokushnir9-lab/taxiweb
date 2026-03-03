@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Водитель</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Шапка -->
+        <div class="app-header">
+            <div class="profile-avatar" onclick="App.loadSection('profile')">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="balance-card">
+                <span class="balance-label">Баланс</span>
+                <span class="balance-value" id="driver-balance">1 250 ₽</span>
+            </div>
+            <div class="theme-toggle" onclick="App.toggleTheme()">
+                <i id="theme-icon" class="fas fa-moon"></i>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <section class="section">
+            <!-- Заголовок -->
+            <div class="section-header">
+                <button class="btn back-btn" onclick="App.loadSection('main')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="section-title">Водитель</h2>
+            </div>
+
+            <!-- Карточка водителя -->
+            <div class="driver-card" id="driver-card">
+                <!-- Загружается через JS -->
+                <div class="driver-info">
+                    <div class="driver-photo">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="driver-details">
+                        <h3 id="driver-name">Иван Петров</h3>
+                        <div class="driver-rating">
+                            <i class="fas fa-star"></i>
+                            <span id="driver-rating">4.8</span>
+                            <span class="rating-count">(124 оценки)</span>
+                        </div>
+                        <div class="car-info">
+                            <i class="fas fa-car"></i>
+                            <span id="car-model">Toyota Camry</span>
+                            <span id="car-color">• Черный</span>
+                            <span id="car-number">• А123ВС77</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Статус водителя -->
+                <div class="driver-status-card">
+                    <div class="driver-status-toggle">
+                        <div class="status-indicator online" id="driver-status-indicator"></div>
+                        <span class="status-text" id="driver-status-text">В сети</span>
+                        <label class="switch">
+                            <input type="checkbox" checked id="driver-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="driver-stats">
+                        <div class="stat">
+                            <span class="stat-value" id="completed-orders">247</span>
+                            <span class="stat-label">Заказов</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="online-hours">156</span>
+                            <span class="stat-label">Часов онлайн</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Информация о тарифе -->
+                <div class="tariff-info" id="tariff-info">
+                    <div class="tariff-status active">
+                        <i class="fas fa-crown"></i>
+                        <div>
+                            <h4>Тариф активен</h4>
+                            <p>Истекает через <span id="tariff-expires">8:42:15</span></p>
+                        </div>
+                        <button class="btn small" onclick="Driver.extendTariff()">
+                            Продлить
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Табы -->
+            <div class="tabs" id="driver-tabs">
+                <button class="tab active" data-tab="app-orders">Эфир</button>
+                <button class="tab" data-tab="tg-orders">Telegram</button>
+                <button class="tab" data-tab="stats">Статистика</button>
+            </div>
+
+            <!-- Контент табов -->
+            <div class="tab-content">
+                <!-- Таб Эфир (заказы из приложения) -->
+                <div class="tab-pane active" id="app-orders-tab">
+                    <!-- Выбор города -->
+                    <div class="city-selector">
+                        <select id="city-select" class="form-select">
+                            <option value="all">Все города</option>
+                            <option value="moscow" selected>Москва</option>
+                            <option value="spb">Санкт-Петербург</option>
+                            <option value="ekb">Екатеринбург</option>
+                            <option value="kazan">Казань</option>
+                            <option value="novosibirsk">Новосибирск</option>
+                        </select>
+                        <button class="btn icon-btn" onclick="Driver.refreshOrders()" title="Обновить">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+
+                    <!-- Фильтры -->
+                    <div class="filters">
+                        <div class="filter-tags">
+                            <button class="filter-tag active" data-filter="all">Все</button>
+                            <button class="filter-tag" data-filter="high-price">Высокая цена</button>
+                            <button class="filter-tag" data-filter="new">Новые</button>
+                            <button class="filter-tag" data-filter="nearby">Рядом</button>
+                            <button class="filter-tag" data-filter="airport">В аэропорт</button>
+                        </div>
+                        <div class="sort-dropdown">
+                            <select id="sort-select">
+                                <option value="newest">Сначала новые</option>
+                                <option value="price-high">По цене (дорогие)</option>
+                                <option value="price-low">По цене (дешевые)</option>
+                                <option value="distance">По расстоянию</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Лента заказов -->
+                    <div id="app-orders-feed" class="orders-feed">
+                        <!-- Заказ 1 -->
+                        <div class="order-item" data-order-id="1243">
+                            <div class="order-header">
+                                <div class="order-id">#1243</div>
+                                <div class="order-time">2 мин назад</div>
+                            </div>
+                            
+                            <div class="order-price">
+                                <span class="price-badge">480 ₽</span>
+                                <span class="distance">2.8 км</span>
+                            </div>
+                            
+                            <div class="order-route">
+                                <div class="route-point from">
+                                    <i class="fas fa-circle"></i>
+                                    <span>ул. Ленина, 10</span>
+                                </div>
+                                <div class="route-point to">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>ул. Пушкина, 25</span>
+                                </div>
+                            </div>
+                            
+                            <div class="order-meta">
+                                <span class="meta-item"><i class="fas fa-user"></i> 1 пасс.</span>
+                                <span class="meta-item"><i class="fas fa-car"></i> Эконом</span>
+                                <span class="meta-item"><i class="fas fa-credit-card"></i> Карта</span>
+                            </div>
+                            
+                            <div class="driver-actions">
+                                <button class="btn accept full-width" onclick="Driver.acceptOrder('1243')">
+                                    <i class="fas fa-check"></i> Взять за 480 ₽
+                                </button>
+                                <button class="btn primary outline full-width" onclick="Driver.openPriceModal('1243', 480)">
+                                    <i class="fas fa-tag"></i> Предложить цену
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Заказ 2 -->
+                        <div class="order-item" data-order-id="1244">
+                            <div class="order-header">
+                                <div class="order-id">#1244</div>
+                                <div class="order-time">5 мин назад</div>
+                            </div>
+                            
+                            <div class="order-price">
+                                <span class="price-badge">720 ₽</span>
+                                <span class="distance">5.2 км</span>
+                            </div>
+                            
+                            <div class="order-route">
+                                <div class="route-point from">
+                                    <i class="fas fa-circle"></i>
+                                    <span>ТЦ Мега, Химки</span>
+                                </div>
+                                <div class="route-point to">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Шереметьево, терминал D</span>
+                                </div>
+                            </div>
+                            
+                            <div class="order-meta">
+                                <span class="meta-item"><i class="fas fa-user"></i> 2 пасс.</span>
+                                <span class="meta-item"><i class="fas fa-car"></i> Комфорт</span>
+                                <span class="meta-item"><i class="fas fa-money-bill-wave"></i> Наличные</span>
+                            </div>
+                            
+                            <div class="driver-actions">
+                                <button class="btn accept full-width" onclick="Driver.acceptOrder('1244')">
+                                    <i class="fas fa-check"></i> Взять за 720 ₽
+                                </button>
+                                <button class="btn primary outline full-width" onclick="Driver.openPriceModal('1244', 720)">
+                                    <i class="fas fa-tag"></i> Предложить цену
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Заказ 3 -->
+                        <div class="order-item" data-order-id="1245">
+                            <div class="order-header">
+                                <div class="order-id">#1245</div>
+                                <div class="order-time">12 мин назад</div>
+                            </div>
+                            
+                            <div class="order-price">
+                                <span class="price-badge">1 150 ₽</span>
+                                <span class="distance">12.5 км</span>
+                            </div>
+                            
+                            <div class="order-route">
+                                <div class="route-point from">
+                                    <i class="fas fa-circle"></i>
+                                    <span>ВДНХ, главный вход</span>
+                                </div>
+                                <div class="route-point to">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Домодедово, терминал А</span>
+                                </div>
+                            </div>
+                            
+                            <div class="order-meta">
+                                <span class="meta-item"><i class="fas fa-user"></i> 3 пасс.</span>
+                                <span class="meta-item"><i class="fas fa-car"></i> Бизнес</span>
+                                <span class="meta-item"><i class="fas fa-credit-card"></i> Карта</span>
+                            </div>
+                            
+                            <div class="driver-actions">
+                                <button class="btn accept full-width" onclick="Driver.acceptOrder('1245')">
+                                    <i class="fas fa-check"></i> Взять за 1 150 ₽
+                                </button>
+                                <button class="btn primary outline full-width" onclick="Driver.openPriceModal('1245', 1150)">
+                                    <i class="fas fa-tag"></i> Предложить цену
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Таб Telegram -->
+                <div class="tab-pane" id="tg-orders-tab">
+                    <div class="tg-notice">
+                        <i class="fab fa-telegram"></i>
+                        <div>
+                            <h5>Заказы из Telegram</h5>
+                            <p>Заказы из подключенных Telegram-ботов и групп</p>
+                        </div>
+                    </div>
+
+                    <!-- Фильтры для TG -->
+                    <div class="filters">
+                        <div class="filter-tags">
+                            <button class="filter-tag active" data-filter="all">Все</button>
+                            <button class="filter-tag" data-filter="new">Новые</button>
+                            <button class="filter-tag" data-filter="urgent">Срочные</button>
+                            <button class="filter-tag" data-filter="without-driver">Без водителя</button>
+                        </div>
+                    </div>
+
+                    <!-- Лента заказов TG -->
+                    <div id="tg-orders-feed" class="orders-feed">
+                        <!-- Telegram заказ 1 -->
+                        <div class="order-item tg-order" data-order-id="tg-1001">
+                            <div class="order-header">
+                                <div class="order-id">TG#1001</div>
+                                <div class="order-source">
+                                    <i class="fab fa-telegram"></i> Группа "Такси Москва"
+                                </div>
+                            </div>
+                            
+                            <div class="order-price">
+                                <span class="price-badge">600 ₽</span>
+                                <div class="order-time">8 мин назад</div>
+                            </div>
+                            
+                            <div class="order-route">
+                                <div class="route-point from">
+                                    <i class="fas fa-circle"></i>
+                                    <span>м. Киевская</span>
+                                </div>
+                                <div class="route-point to">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>м. Парк Победы</span>
+                                </div>
+                            </div>
+                            
+                            <div class="order-meta">
+                                <span class="meta-item"><i class="fas fa-user"></i> 1 пасс.</span>
+                                <span class="meta-item"><i class="fas fa-comment"></i> "Без разговоров"</span>
+                            </div>
+                            
+                            <div class="driver-actions">
+                                <button class="btn accept full-width" onclick="Driver.acceptTgOrder('tg-1001')">
+                                    <i class="fas fa-check"></i> Взять за 600 ₽
+                                </button>
+                                <button class="btn primary outline full-width" onclick="Driver.openPriceModal('tg-1001', 600)">
+                                    <i class="fas fa-tag"></i> Предложить цену
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Telegram заказ 2 -->
+                        <div class="order-item tg-order" data-order-id="tg-1002">
+                            <div class="order-header">
+                                <div class="order-id">TG#1002</div>
+                                <div class="order-source">
+                                    <i class="fab fa-telegram"></i> Бот "Заказы такси"
+                                </div>
+                            </div>
+                            
+                            <div class="order-price">
+                                <span class="price-badge">850 ₽</span>
+                                <div class="order-time">15 мин назад</div>
+                            </div>
+                            
+                            <div class="order-route">
+                                <div class="route-point from">
+                                    <i class="fas fa-circle"></i>
+                                    <span>ул. Тверская, 15</span>
+                                </div>
+                                <div class="route-point to">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Аэропорт Внуково</span>
+                                </div>
+                            </div>
+                            
+                            <div class="order-meta">
+                                <span class="meta-item"><i class="fas fa-user"></i> 2 пасс.</span>
+                                <span class="meta-item"><i class="fas fa-suitcase"></i> 3 чемодана</span>
+                            </div>
+                            
+                            <div class="driver-actions">
+                                <button class="btn accept full-width" onclick="Driver.acceptTgOrder('tg-1002')">
+                                    <i class="fas fa-check"></i> Взять за 850 ₽
+                                </button>
+                                <button class="btn primary outline full-width" onclick="Driver.openPriceModal('tg-1002', 850)">
+                                    <i class="fas fa-tag"></i> Предложить цену
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Таб Статистика -->
+                <div class="tab-pane" id="stats-tab">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-car"></i></div>
+                            <div class="stat-value" id="total-orders">247</div>
+                            <div class="stat-label">Всего заказов</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-star"></i></div>
+                            <div class="stat-value" id="avg-rating">4.8</div>
+                            <div class="stat-label">Рейтинг</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                            <div class="stat-value" id="total-earned">42 850 ₽</div>
+                            <div class="stat-label">Заработано</div>
+                        </div>
+                    </div>
+
+                    <div class="weekly-stats">
+                        <h5>За эту неделю</h5>
+                        <div class="stats-list">
+                            <div class="stat-item">
+                                <span class="stat-label">Заказов выполнено:</span>
+                                <span class="stat-value">18</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Средний чек:</span>
+                                <span class="stat-value">745 ₽</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Время онлайн:</span>
+                                <span class="stat-value">32 ч</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Отменено заказов:</span>
+                                <span class="stat-value">2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recent-orders">
+                        <h5>Последние заказы</h5>
+                        <div id="recent-orders-list">
+                            <div class="history-item">
+                                <div class="history-header">
+                                    <span class="history-id">#1240</span>
+                                    <span class="history-date">Сегодня, 14:30</span>
+                                </div>
+                                <div class="history-route">ул. Горького → м. Маяковская</div>
+                                <div class="history-footer">
+                                    <span class="history-price">520 ₽</span>
+                                    <span class="history-status completed">Выполнен</span>
+                                </div>
+                            </div>
+                            
+                            <div class="history-item">
+                                <div class="history-header">
+                                    <span class="history-id">#1239</span>
+                                    <span class="history-date">Сегодня, 11:15</span>
+                                </div>
+                                <div class="history-route">ТЦ Авиапарк → Шереметьево</div>
+                                <div class="history-footer">
+                                    <span class="history-price">890 ₽</span>
+                                    <span class="history-status completed">Выполнен</span>
+                                </div>
+                            </div>
+                            
+                            <div class="history-item">
+                                <div class="history-header">
+                                    <span class="history-id">#1238</span>
+                                    <span class="history-date">Вчера, 19:45</span>
+                                </div>
+                                <div class="history-route">Кунцево → Домодедово</div>
+                                <div class="history-footer">
+                                    <span class="history-price">1 240 ₽</span>
+                                    <span class="history-status completed">Выполнен</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Модальное окно предложения цены -->
+        <div class="modal" id="driver-price-modal">
+            <div class="modal-content">
+                <h3><i class="fas fa-tag"></i> Предложить свою цену</h3>
+                <p class="modal-subtitle" id="current-order-price">Текущая цена заказа: <strong>480 ₽</strong></p>
+                
+                <div class="slider-container">
+                    <input type="range" min="300" max="1500" step="20" value="620" id="driver-price-slider" />
+                    <div class="slider-value" id="driver-slider-value">620 ₽</div>
+                </div>
+                <div class="slider-hints">
+                    <span>300 ₽</span>
+                    <span>1500 ₽</span>
+                </div>
+                
+                <div class="price-comparison">
+                    <div class="comparison-item">
+                        <span>Текущая цена:</span>
+                        <span class="price-original" id="original-price">480 ₽</span>
+                    </div>
+                    <div class="comparison-item">
+                        <span>Ваше предложение:</span>
+                        <span class="price-offer" id="offer-price">620 ₽</span>
+                    </div>
+                    <div class="comparison-item difference">
+                        <span>Разница:</span>
+                        <span class="price-diff" id="price-difference">+140 ₽</span>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn secondary" id="cancel-driver-price-btn">Отмена</button>
+                    <button class="btn primary" id="send-driver-offer-btn">Отправить предложение</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модалка тарифа -->
+        <div class="modal" id="tariff-modal">
+            <div class="modal-content">
+                <h3><i class="fas fa-crown"></i> Активировать тариф</h3>
+                <p class="modal-subtitle">Для работы в приложении необходимо активировать тариф</p>
+                
+                <div class="tariff-options">
+                    <div class="tariff-option active" data-tariff="24h">
+                        <div class="tariff-header">
+                            <i class="fas fa-bolt"></i>
+                            <h4>24 часа</h4>
+                        </div>
+                        <div class="tariff-price">199 ₽</div>
+                        <div class="tariff-features">
+                            <p><i class="fas fa-check"></i> Доступ ко всем заказам</p>
+                            <p><i class="fas fa-check"></i> Поддержка 24/7</p>
+                            <p><i class="fas fa-check"></i> Гарантия оплаты</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tariff-option" data-tariff="7days">
+                        <div class="tariff-header">
+                            <i class="fas fa-calendar-week"></i>
+                            <h4>7 дней</h4>
+                        </div>
+                        <div class="tariff-price">999 ₽</div>
+                        <div class="tariff-features">
+                            <p><i class="fas fa-check"></i> Экономия 30%</p>
+                            <p><i class="fas fa-check"></i> Приоритет в ленте</p>
+                            <p><i class="fas fa-check"></i> Расширенная статистика</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn secondary" onclick="Driver.closeTariffModal()">Позже</button>
+                    <button class="btn primary" onclick="Driver.buyTariff('24h')">Активировать за 199 ₽</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модалка принятия заказа -->
+        <div class="modal" id="accept-order-modal">
+            <div class="modal-content">
+                <h3><i class="fas fa-check-circle"></i> Принять заказ</h3>
+                <div class="order-preview-modal">
+                    <div class="order-id-modal">#<span id="modal-order-id">1243</span></div>
+                    <div class="order-price-modal"><span id="modal-order-price">480</span> ₽</div>
+                    <div class="order-route-modal">
+                        <div class="route-point">
+                            <i class="fas fa-circle"></i>
+                            <span id="modal-from">ул. Ленина, 10</span>
+                        </div>
+                        <div class="route-point">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="modal-to">ул. Пушкина, 25</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-details-modal">
+                    <p><i class="fas fa-exclamation-circle"></i> После принятия заказа вам станут доступны контакты пассажира</p>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn secondary" onclick="Driver.closeAcceptModal()">Отмена</button>
+                    <button class="btn accept" onclick="Driver.confirmAcceptOrder()">Да, принять заказ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/app.js"></script>
+    <script src="../js/driver.js"></script>
+    <script>
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем, является ли пользователь водителем
+            Driver.checkDriverStatus();
+            
+            // Инициализация табов
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    Driver.switchTab(tabId);
+                });
+            });
+            
+            // Инициализация фильтров
+            const filterTags = document.querySelectorAll('.filter-tag');
+            filterTags.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    filterTags.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    const filter = this.getAttribute('data-filter');
+                    Driver.applyFilter(filter);
+                });
+            });
+            
+            // Инициализация слайдера цены
+            const priceSlider = document.getElementById('driver-price-slider');
+            if (priceSlider) {
+                priceSlider.addEventListener('input', function(e) {
+                    const value = e.target.value;
+                    document.getElementById('driver-slider-value').textContent = value + ' ₽';
+                    document.getElementById('offer-price').textContent = value + ' ₽';
+                    
+                    // Обновляем разницу
+                    const originalPrice = parseInt(document.getElementById('original-price').textContent);
+                    const diff = value - originalPrice;
+                    const diffElement = document.getElementById('price-difference');
+                    diffElement.textContent = (diff >= 0 ? '+' : '') + diff + ' ₽';
+                    diffElement.className = diff >= 0 ? 'price-diff positive' : 'price-diff negative';
+                });
+            }
+            
+            // Проверка тарифа
+            Driver.checkTariff();
+        });
+    </script>
+</body>
+</html>

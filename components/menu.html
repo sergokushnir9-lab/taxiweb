@@ -1,0 +1,42 @@
+<!-- Шапка приложения -->
+<header class="app-header">
+    <div class="profile-avatar" onclick="App.openProfile()" title="Личный кабинет">
+        <i class="fas fa-user-circle"></i>
+    </div>
+    
+    <div class="balance-card" onclick="App.openModal(topup-modal)">
+        <span class="balance-label">Баланс</span>
+        <span class="balance-value" id="balance">0 ₽</span>
+    </div>
+    
+    <div class="header-actions">
+        <div class="notifications" onclick="App.toggleNotifications()" id="notifications-btn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-count">2</span>
+        </div>
+        
+        <div class="theme-toggle" onclick="App.toggleTheme()">
+            <i class="fas" id="theme-icon">☀️</i>
+        </div>
+    </div>
+</header>
+
+<!-- Главное меню -->
+<main class="menu-grid fade-in">
+    <div class="tile" data-section="passenger">
+        <i class="fas fa-taxi tile-icon"></i>
+        <p>Пассажир</p>
+    </div>
+    <div class="tile" data-section="driver">
+        <i class="fas fa-car-side tile-icon"></i>
+        <p>Водитель</p>
+    </div>
+    <div class="tile" data-section="delivery">
+        <i class="fas fa-shipping-fast tile-icon"></i>
+        <p>Доставка</p>
+    </div>
+    <div class="tile" data-section="planned">
+        <i class="fas fa-calendar-alt tile-icon"></i>
+        <p>Запланировать</p>
+    </div>
+</main>

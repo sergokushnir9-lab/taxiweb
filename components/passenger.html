@@ -1,0 +1,148 @@
+<section class="section">
+    <div class="section-header">
+        <button class="btn back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2 class="section-title">Новый заказ</h2>
+    </div>
+
+    <div class="search-card">
+        <!-- Быстрые адреса -->
+        <div class="quick-addresses">
+            <div class="quick-address" data-type="home">
+                <i class="fas fa-home"></i>
+                <span>Домой</span>
+            </div>
+            <div class="quick-address" data-type="work">
+                <i class="fas fa-briefcase"></i>
+                <span>На работу</span>
+            </div>
+            <div class="quick-address" data-type="airport">
+                <i class="fas fa-plane"></i>
+                <span>В аэропорт</span>
+            </div>
+        </div>
+
+        <div class="input-group required">
+            <i class="fas fa-map-pin"></i>
+            <input type="text" placeholder="Откуда (Енакиево)*" id="from" autocomplete="off" required />
+            <span class="required-badge">обязательно</span>
+        </div>
+        <div class="input-group required">
+            <i class="fas fa-flag-checkered"></i>
+            <input type="text" placeholder="Куда (Енакиево)*" id="to" autocomplete="off" required />
+            <span class="required-badge">обязательно</span>
+        </div>
+        <div class="input-group required">
+            <i class="fas fa-phone"></i>
+            <input type="tel" placeholder="Номер телефона*" id="phone" autocomplete="off" required />
+            <span class="required-badge">обязательно</span>
+        </div>
+
+        <!-- Детский режим и багаж -->
+        <div class="special-options">
+            <div class="option-toggle" data-option="child-seat">
+                <i class="fas fa-baby"></i>
+                <span>Детское кресло</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="child-seat-toggle">
+                    <span class="slider"></span>
+                </div>
+            </div>
+            
+            <div class="option-toggle" data-option="luggage">
+                <i class="fas fa-suitcase"></i>
+                <span>Багаж</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="luggage-toggle">
+                    <span class="slider"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group price-input-group required">
+            <i class="fas fa-ruble-sign"></i>
+            <input type="tel" inputmode="numeric" placeholder="Ваша цена*" id="offer-price" required />
+            <span class="currency">₽</span>
+            <span class="required-badge">обязательно</span>
+        </div>
+
+        <div class="price-hint">
+            По похожим поездкам обычно платят <strong>380–680 ₽</strong>
+        </div>
+
+        <button class="btn primary full-width" id="publish-order-btn">
+            <i class="fas fa-paper-plane"></i> Опубликовать заказ
+        </button>
+        
+        <div class="required-note">
+            <i class="fas fa-info-circle"></i> Поля помеченные * являются обязательными для заполнения
+        </div>
+    </div>
+
+    <!-- Блок активного заказа -->
+    <div id="active-order" class="hidden" style="margin-top: 24px;">
+        <div class="order-preview">
+            <div class="driver-photo-section">
+                <div class="driver-photo">
+                    <i class="fas fa-user-circle"></i>
+                    <div class="driver-verified">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="driver-info">
+                    <h4 id="driver-name">Ожидаем водителя</h4>
+                    <div class="driver-rating">
+                        <i class="fas fa-star"></i> 0.0 • 0 поездок
+                    </div>
+                    <div class="car-info">
+                        <i class="fas fa-car"></i> Не выбрано
+                    </div>
+                </div>
+            </div>
+
+            <div class="route-info">
+                <span>От: <span id="active-from"></span></span>
+                <span>До: <span id="active-to"></span></span>
+                <span>Телефон: <span id="active-phone"></span></span>
+            </div>
+            
+            <div class="order-details" id="order-details">
+                <!-- Детали заказа будут здесь -->
+            </div>
+
+            <div class="price" id="active-price">0 ₽</div>
+            <div class="status-badge waiting" id="order-timer">
+                Ожидает водителя • <span id="timer">00:00</span>
+            </div>
+            
+            <div class="order-actions">
+                <button class="btn primary full-width" id="change-price-btn">
+                    Изменить цену
+                </button>
+                <button class="btn secondary full-width" id="cancel-order-btn" style="margin-top: 10px;">
+                    Отменить заказ
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Модальное окно изменения цены -->
+<div class="modal" id="price-modal">
+    <div class="modal-content">
+        <h3>Новая цена</h3>
+        <div class="slider-container">
+            <input type="range" min="100" max="10000" step="50" value="580" id="price-slider" />
+            <div class="slider-value" id="slider-value">580 ₽</div>
+        </div>
+        <div class="slider-hints">
+            <span>100 ₽</span>
+            <span>10 000 ₽</span>
+        </div>
+        <div class="modal-actions">
+            <button class="btn" id="cancel-price-btn">Отмена</button>
+            <button class="btn primary" id="save-price-btn">Сохранить</button>
+        </div>
+    </div>
+</div>
