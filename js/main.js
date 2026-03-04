@@ -219,6 +219,12 @@ const App = {
         loader.style.display = show ? 'flex' : 'none';
     },
 
+
+    // Скрыть лоадер
+    hideLoader: function() {
+        this.showLoader(false);
+    },
+
     // Открыть профиль
     openProfile: function() {
         this.switchSection('profile');
