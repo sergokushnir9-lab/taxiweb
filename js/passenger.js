@@ -27,15 +27,22 @@ const Passenger = {
     },
 
     // Загрузка быстрых адресов
-    loadQuickAddresses: function() {
-        // Можно загружать из localStorage или с сервера
-        const quickAddresses = Helpers.loadFromStorage('quickAddresses') || {
+    loadQuickAddresses: async function() {
+        const fallback = Helpers.loadFromStorage('quickAddresses') || {
             home: { from: 'ул. Ленина, 15', to: '' },
             work: { from: 'ул. Пушкина, 42', to: '' },
             airport: { from: '', to: 'Аэропорт Енакиево' }
         };
-        
-        this.quickAddresses = quickAddresses;
+
+        try {
+            const response = await fetch('/api/passenger/quick-addresses');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            this.quickAddresses = await response.json();
+            this.saveQuickAddresses();
+        } catch (error) {
+            console.warn('Не удалось загрузить быстрые адреса из API, используем локальные.', error);
+            this.quickAddresses = fallback;
+        }
     },
 
     // Сохранение быстрых адресов
@@ -276,7 +283,7 @@ const Passenger = {
     },
 
     // Публикация заказа
-    publishOrder: function() {
+    publishOrder: async function() {
         const validation = this.validateForm();
         if (!validation.valid) {
             App.showNotification(validation.error, 'error');
@@ -287,22 +294,36 @@ const Passenger = {
         const childSeat = document.getElementById('child-seat-toggle').checked;
         const luggage = document.getElementById('luggage-toggle').checked;
 
-        // Создаем объект заказа
-        this.currentOrder = {
-            id: Helpers.generateId(),
-            from: data.from,
-            to: data.to,
-            phone: data.phone,
-            price: data.price,
-            childSeat: childSeat,
-            luggage: luggage,
-            status: 'waiting',
-            createdAt: new Date().toISOString(),
-            driver: null
-        };
+        try {
+            const response = await fetch('/api/passenger/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    from: data.from,
+                    to: data.to,
+                    phone: data.phone,
+                    price: data.price,
+                    comment: [childSeat ? 'Детское кресло' : '', luggage ? 'Багаж' : ''].filter(Boolean).join(', ')
+                })
+            });
 
-        // Сохраняем заказ
-        this.saveOrder(this.currentOrder);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const apiOrder = await response.json();
+            this.currentOrder = {
+                ...apiOrder,
+                childSeat: childSeat,
+                luggage: luggage,
+                status: 'waiting',
+                driver: null
+            };
+
+            this.saveOrder(this.currentOrder);
+        } catch (error) {
+            console.error('Ошибка публикации заказа через API:', error);
+            App.showNotification('Не удалось опубликовать заказ на сервере', 'error');
+            return;
+        }
         
         // Показываем активный заказ
         this.showActiveOrder(this.currentOrder);

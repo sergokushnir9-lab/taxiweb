@@ -28,7 +28,8 @@ const Driver = {
         activeFilter: 'all',
         activeCity: 'moscow',
         tariffActive: true,
-        tariffExpires: null
+        tariffExpires: null,
+        appOrders: []
     },
 
     // DOM элементы (кеширование)
@@ -329,7 +330,7 @@ const Driver = {
     },
 
     // Загрузка заказов
-    loadOrders: function() {
+    loadOrders: async function() {
         if (!this.state.isOnline || !this.state.tariffActive) {
             this.clearOrdersFeed();
             return;
@@ -346,10 +347,31 @@ const Driver = {
             feed.innerHTML = '<div class="loading-orders"><i class="fas fa-spinner fa-spin"></i><p>Загружаем заказы...</p></div>';
         }
         
-        // Симуляция загрузки
-        setTimeout(() => {
+        try {
+            if (this.state.currentTab === 'app-orders') {
+                const response = await fetch('/api/driver/orders');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const orders = await response.json();
+                this.state.appOrders = orders.map((order) => ({
+                    id: order.id,
+                    price: order.price,
+                    from: order.from,
+                    to: order.to,
+                    time: 'только что',
+                    passengers: 1,
+                    category: 'Эконом',
+                    payment: 'Наличные',
+                    city: this.state.activeCity,
+                    status: order.status
+                }));
+            }
             this.renderOrders();
-        }, 1000);
+        } catch (error) {
+            console.error('Ошибка загрузки заказов водителя:', error);
+            if (feed) {
+                feed.innerHTML = '<div class="empty-orders"><i class="fas fa-exclamation-circle"></i><p>Не удалось загрузить заказы из API</p></div>';
+            }
+        }
     },
 
     // Очистка ленты заказов
@@ -374,7 +396,7 @@ const Driver = {
         
         // Тестовые данные
         const orders = this.state.currentTab === 'app-orders' 
-            ? this.getAppOrders()
+            ? this.state.appOrders
             : this.getTgOrders();
         
         // Применяем фильтры и сортировку
@@ -636,55 +658,41 @@ const Driver = {
     },
 
     // Подтвердить принятие заказа
-    confirmAcceptOrder: function() {
+    confirmAcceptOrder: async function() {
         App.showLoader();
-        
-        // Симуляция API запроса
-        setTimeout(() => {
+
+        try {
+            if (!this.state.currentOrder.orderId.startsWith('tg-')) {
+                const response = await fetch(`/api/driver/orders/${this.state.currentOrder.orderId}/accept`, {
+                    method: 'PATCH'
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            }
+
             App.hideLoader();
             App.closeModal(this.config.acceptModalId);
-            
-            // Показываем контакты в принятом заказе
+
             const orderElement = document.querySelector(`[data-order-id="${this.state.currentOrder.orderId}"]`);
             if (orderElement) {
-                // Удаляем кнопки принятия
                 const actions = orderElement.querySelector('.driver-actions');
                 if (actions) actions.remove();
-                
-                // Добавляем контакты
-                const contactsHTML = `
+
+                orderElement.insertAdjacentHTML('beforeend', `
                     <div class="order-contacts">
-                        <div class="contact-item">
-                            <i class="fas fa-phone"></i>
-                            <span class="contact-phone">+7 XXX XXX-XX-XX</span>
-                            <button class="btn icon-btn small" onclick="Driver.callPassenger('${this.state.currentOrder.orderId}')">
-                                <i class="fas fa-phone-alt"></i>
-                            </button>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fab fa-telegram"></i>
-                            <span class="contact-telegram">Чат с пассажиром</span>
-                            <button class="btn icon-btn small primary" onclick="Driver.openChat('${this.state.currentOrder.orderId}')">
-                                <i class="fas fa-comment"></i>
-                            </button>
-                        </div>
                         <div class="order-status">
                             <span class="status-badge accepted">Заказ принят</span>
                         </div>
                     </div>
-                `;
-                
-                orderElement.insertAdjacentHTML('beforeend', contactsHTML);
+                `);
             }
-            
+
             App.showNotification(`Заказ #${this.state.currentOrder.orderId.replace('tg-', '')} успешно принят!`, "success");
-            
-            // Обновляем статистику
-            const totalOrders = document.getElementById('total-orders');
-            if (totalOrders) {
-                totalOrders.textContent = parseInt(totalOrders.textContent) + 1;
-            }
-        }, 1500);
+            this.loadOrders();
+        } catch (error) {
+            App.hideLoader();
+            console.error('Ошибка принятия заказа:', error);
+            App.showNotification('Не удалось принять заказ через API', 'error');
+        }
     },
 
     // Закрыть модалку принятия заказа

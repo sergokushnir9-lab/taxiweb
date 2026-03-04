@@ -524,33 +524,45 @@ const Delivery = {
         };
 
         try {
-            // Сохраняем в историю
+            const description = `${deliveryData.items} | Опции: ${[
+                this.state.isFragile ? 'хрупкий' : '',
+                this.state.isCold ? 'охлаждение' : '',
+                this.state.isFast ? 'срочно' : ''
+            ].filter(Boolean).join(', ') || 'нет'}`;
+
+            const response = await fetch('/api/delivery/requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    address: deliveryData.address,
+                    phone: deliveryData.phone,
+                    description,
+                    price: deliveryData.price
+                })
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const apiDelivery = await response.json();
+            deliveryData.id = apiDelivery.id;
+            deliveryData.status = apiDelivery.status;
+
             this.saveToHistory(deliveryData);
-            
-            // Сохраняем предпочтения пользователя
             this.saveUserPreferences();
-            
-            // Имитация API запроса
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Скрываем лоадер
+
             if (typeof TaxiLoader !== 'undefined') {
                 TaxiLoader.hide();
             }
-            
-            // Показываем успешное уведомление
+
             App.showNotification("Заказ на доставку опубликован! Ищем курьера...", "success");
-            
-            // Сохраняем активный заказ
             this.state.activeOrder = deliveryData;
-            
-            // Перенаправляем на страницу активных заказов
+
             setTimeout(() => {
-                if (typeof App !== 'undefined') {
-                    App.loadSection('passenger');
+                if (typeof App !== 'undefined' && typeof App.switchSection === 'function') {
+                    App.switchSection('passenger');
                 }
             }, 1500);
-            
+
         } catch (error) {
             console.error('Ошибка при публикации доставки:', error);
             
